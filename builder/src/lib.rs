@@ -5,8 +5,8 @@ use syn::{parse_macro_input, DeriveInput, Fields};
 #[proc_macro_derive(Builder)]
 pub fn derive(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
-    let ident = &input.ident;
-    let builder_ident = format_ident!("{}Builder", ident);
+    let struct_ident = &input.ident;
+    let builder_ident = format_ident!("{}Builder", struct_ident);
 
     let data = input.data;
 
@@ -41,9 +41,15 @@ pub fn derive(input: TokenStream) -> TokenStream {
                     self
                 }
             )*
+
+            pub fn build(&mut self) -> Result<#struct_ident, Box<dyn std::error::Error>> {
+                Ok(#struct_ident {
+                    #(#field_names: self.#field_names.clone().ok_or("missing field")?),*
+                })
+            }
         }
 
-        impl #ident {
+        impl #struct_ident {
             pub fn builder() -> #builder_ident {
                 #builder_ident {
                     #(#field_names: None),*
