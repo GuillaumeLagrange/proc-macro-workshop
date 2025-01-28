@@ -34,6 +34,15 @@ pub fn derive(input: TokenStream) -> TokenStream {
             #(#field_names: Option<#field_types>),*
         }
 
+        impl #builder_ident {
+            #(
+                pub fn #field_names(&mut self, #field_names: #field_types) -> &mut Self {
+                    self.#field_names = Some(#field_names);
+                    self
+                }
+            )*
+        }
+
         impl #ident {
             pub fn builder() -> #builder_ident {
                 #builder_ident {
